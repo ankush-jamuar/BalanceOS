@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  clerkId   String   @unique
+  email     String   @unique
+  username  String   @unique
+  fullName  String
+  avatarUrl String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedGroups         Group[]        @relation("GroupOwner")
+  memberships         GroupMember[]
+  expensesPaid        Expense[]      @relation("PaidBy")
+  expensesCreated     Expense[]      @relation("CreatedBy")
+  splits              ExpenseSplit[]
+  settlementsPaid     Settlement[]   @relation("SettlePayer")
+  settlementsRecv     Settlement[]   @relation("SettleReceiver")
+  settlementsCreated  Settlement[]   @relation("SettleCreatedBy")
+  chatMessages        ChatMessage[]
+
+  @@index([clerkId])
+}
+
+model Group {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  currency    String   @default("USD")
+  ownerId     String   @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User          @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     GroupMember[]
+  expenses    Expense[]
+  settlements Settlement[]
+}
+
+model GroupMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  groupId   String   @db.Uuid
+  userId    String   @db.Uuid
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+model Expense {
+  id              String      @id @default(uuid()) @db.Uuid
+  groupId         String      @db.Uuid
+  title           String
+  description     String?
+  amount          Int // stored in cents
+  paidByUserId    String      @db.Uuid
+  splitMethod     SplitMethod
+  createdByUserId String      @db.Uuid
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  group           Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  paidByUser      User        @relation("PaidBy", fields: [paidByUserId], references: [id], onDelete: Cascade)
+  createdByUser   User        @relation("CreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  splits          ExpenseSplit[]
+  chatMessages    ChatMessage[]
+
+  @@index([groupId])
+  @@index([paidByUserId])
+}
+
+enum SplitMethod {
+  EQUAL
+  UNEQUAL
+  PERCENTAGE
+  SHARES
+}
+
+model ExpenseSplit {
+  id              String   @id @default(uuid()) @db.Uuid
+  expenseId       String   @db.Uuid
+  userId          String   @db.Uuid
+  amountOwed      Int // stored in cents
+  percentageValue Decimal? @db.Decimal(5, 2)
+  sharesValue     Decimal? @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+
+  expense         Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, userId])
+  @@index([userId, expenseId])
+}
+
+model Settlement {
+  id              String   @id @default(uuid()) @db.Uuid
+  groupId         String   @db.Uuid
+  payerUserId     String   @db.Uuid
+  receiverUserId  String   @db.Uuid
+  amount          Int // stored in cents
+  note            String?
+  createdByUserId String   @db.Uuid
+  createdAt       DateTime @default(now())
+
+  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payerUser       User     @relation("SettlePayer", fields: [payerUserId], references: [id], onDelete: Cascade)
+  receiverUser    User     @relation("SettleReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  createdByUser   User     @relation("SettleCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, payerUserId, receiverUserId])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  expenseId String   @db.Uuid
+  userId    String   @db.Uuid
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expenseId])
+}

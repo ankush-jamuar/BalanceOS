@@ -1,0 +1,344 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* ─── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Tailwind Theme Bridge ──────────────────────────────────────────────────
+   Maps CSS custom properties into Tailwind's token system.
+   Only the design tokens defined here are used across the codebase.
+────────────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Fonts */
+  --font-sans:    var(--font-inter);
+  --font-display: var(--font-instrument-serif);
+  --font-mono:    var(--font-jetbrains-mono);
+
+  /* Core surface colors (5-layer depth system) */
+  --color-background:  var(--bg-ground);
+  --color-foreground:  var(--text-primary);
+  --color-card:        var(--bg-raised);
+  --color-card-foreground: var(--text-primary);
+  --color-popover:     var(--bg-float);
+  --color-popover-foreground: var(--text-primary);
+
+  /* shadcn semantic mappings */
+  --color-primary:             var(--emerald);
+  --color-primary-foreground:  var(--bg-void);
+  --color-secondary:           var(--bg-raised);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted:               var(--bg-raised);
+  --color-muted-foreground:    var(--text-secondary);
+  --color-accent:              var(--bg-float);
+  --color-accent-foreground:   var(--text-primary);
+  --color-destructive:         var(--debt);
+  --color-destructive-foreground: var(--text-primary);
+  --color-border:   var(--border-subtle);
+  --color-input:    var(--bg-raised);
+  --color-ring:     var(--emerald);
+
+  /* Radius system */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  20px;
+  --radius-pill: 9999px;
+
+  /* BalanceOS custom accent tokens (accessible via bg-emerald, text-cyan, etc.) */
+  --color-emerald:        var(--emerald);
+  --color-emerald-dim:    var(--emerald-dim);
+  --color-cyan:           var(--cyan);
+  --color-cyan-dim:       var(--cyan-dim);
+  --color-violet:         var(--violet);
+  --color-violet-dim:     var(--violet-dim);
+  --color-debt:           var(--debt);
+  --color-credit:         var(--credit);
+  --color-warning:        var(--warning);
+
+  /* Legacy sidebar (shadcn requirement) */
+  --color-sidebar-ring:               var(--border-subtle);
+  --color-sidebar-border:             var(--border-subtle);
+  --color-sidebar-accent-foreground:  var(--text-primary);
+  --color-sidebar-accent:             var(--bg-float);
+  --color-sidebar-primary-foreground: var(--text-primary);
+  --color-sidebar-primary:            var(--emerald);
+  --color-sidebar-foreground:         var(--text-secondary);
+  --color-sidebar:                    var(--bg-raised);
+
+  /* Chart colors */
+  --color-chart-1: var(--emerald);
+  --color-chart-2: var(--cyan);
+  --color-chart-3: var(--violet);
+  --color-chart-4: var(--warning);
+  --color-chart-5: var(--debt);
+}
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────────
+   The single source of truth for all visual decisions.
+   Never use arbitrary Tailwind values — always use these tokens.
+────────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* === BACKGROUND LAYERS — 5-Level Depth System === */
+  --bg-void:    #06080B;   /* The base. Near-black, warm graphite. */
+  --bg-ground:  #0D1117;   /* Primary surface. Main content area. */
+  --bg-raised:  #141B24;   /* Elevated cards. Above ground. */
+  --bg-float:   #1C2532;   /* Modals, dropdowns, command palette. */
+  --bg-overlay: #243040;   /* Top-level overlays, tooltips. */
+
+  /* === BORDER SYSTEM === */
+  --border-subtle:  rgba(255,255,255,0.05);   /* Most surfaces */
+  --border-default: rgba(255,255,255,0.09);   /* Interactive/hover */
+  --border-strong:  rgba(255,255,255,0.15);   /* Focused/active */
+
+  /* === TEXT SYSTEM === */
+  --text-primary:   #E8EFF7;   /* Main readable content */
+  --text-secondary: #8896A8;   /* Supporting text, descriptions */
+  --text-tertiary:  #4A5568;   /* Placeholders, timestamps, disabled */
+
+  /* === EMERALD — Primary Action Accent === */
+  --emerald:        #0FD492;
+  --emerald-dim:    #0BB07A;
+  --emerald-glow:   rgba(15,212,146,0.12);
+  --emerald-border: rgba(15,212,146,0.22);
+
+  /* === CYAN — Data, Intelligence, Realtime === */
+  --cyan:        #22D3EE;
+  --cyan-dim:    #0E9DB8;
+  --cyan-glow:   rgba(34,211,238,0.10);
+  --cyan-border: rgba(34,211,238,0.20);
+
+  /* === VIOLET — Identity, Personal, Ownership === */
+  --violet:        #8B5CF6;
+  --violet-dim:    #6D28D9;
+  --violet-glow:   rgba(139,92,246,0.12);
+  --violet-border: rgba(139,92,246,0.22);
+
+  /* === SEMANTIC COLORS === */
+  --debt:     #F43F5E;   /* You owe money — rose */
+  --credit:   #0FD492;   /* You are owed — emerald */
+  --neutral:  #64748B;   /* Balanced/settled */
+  --warning:  #F59E0B;   /* Pending, attention */
+
+  /* === GLOW PRESETS === */
+  --glow-emerald: 0 0 80px -10px rgba(15,212,146,0.30);
+  --glow-cyan:    0 0 80px -10px rgba(34,211,238,0.22);
+  --glow-violet:  0 0 80px -10px rgba(139,92,246,0.22);
+  --glow-card:    0 24px 50px -12px rgba(0,0,0,0.75);
+
+  /* === shadcn RADIUS (kept for component compat) === */
+  --radius: 0.5rem;
+}
+
+/* ─── Base Styles ────────────────────────────────────────────────────────────
+   Global resets and base element styling.
+────────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--bg-ground);
+    color: var(--text-primary);
+  }
+
+  /* Financial numbers always use mono */
+  .mono, [data-value], [data-amount] {
+    font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  }
+
+  /* Display headlines use Instrument Serif */
+  .display {
+    font-family: var(--font-instrument-serif), 'Instrument Serif', Georgia, serif;
+  }
+}
+
+/* ─── Custom Utilities ───────────────────────────────────────────────────────
+   Reusable visual patterns used throughout the product.
+   Add new utilities here, never inline in components.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* Fine dot grid background pattern */
+@utility dot-grid {
+  background-image: radial-gradient(
+    circle,
+    rgba(255,255,255,0.08) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+/* Subtle line grid (for landing page sections only) */
+@utility line-grid {
+  background-image:
+    linear-gradient(to right,  rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Surface levels */
+@utility surface-ground {
+  background-color: var(--bg-ground);
+}
+@utility surface-raised {
+  background-color: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+}
+@utility surface-float {
+  background-color: var(--bg-float);
+  border: 1px solid var(--border-default);
+}
+@utility surface-overlay {
+  background-color: var(--bg-overlay);
+  border: 1px solid var(--border-strong);
+}
+
+/* Glow overlays */
+@utility glow-emerald {
+  box-shadow: var(--glow-emerald);
+}
+@utility glow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+@utility glow-card {
+  box-shadow: var(--glow-card);
+}
+
+/* Text scale utilities */
+@utility text-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+@utility text-caption {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+}
+
+@utility text-mono-lg {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+@utility text-mono-sm {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Aurora gradient animation for auth/landing */
+@utility aurora-bg {
+  background: 
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(15,212,146,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(34,211,238,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 40% at 50% 50%, rgba(139,92,246,0.04) 0%, transparent 70%),
+    var(--bg-void);
+}
+
+/* Gradient text presets */
+@utility gradient-emerald {
+  background: linear-gradient(135deg, var(--emerald) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility gradient-title {
+  background: linear-gradient(180deg, #E8EFF7 0%, #8896A8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glassmorphism surfaces */
+@utility glass {
+  background: rgba(20, 27, 36, 0.70);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+}
+
+@utility glass-float {
+  background: rgba(28, 37, 50, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-default);
+}
+
+/* Input field standard treatment */
+@utility input-base {
+  background-color: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  transition: border-color 150ms ease;
+
+  &:focus {
+    border-color: var(--emerald);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(15,212,146,0.10);
+  }
+}
+
+/* Scrollbar styling */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+/* Sidebar item active/hover states */
+@utility nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: background-color 120ms ease, color 120ms ease;
+  cursor: pointer;
+}
+
+@utility nav-item-active {
+  background-color: rgba(15,212,146,0.08);
+  color: var(--text-primary);
+}
+
+/* Underline tab system (group workspace) */
+@utility tab-underline {
+  position: relative;
+  padding: 8px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 150ms ease;
+  border-bottom: 2px solid transparent;
+}
+
+@utility tab-underline-active {
+  color: var(--text-primary);
+  border-bottom-color: var(--emerald);
+}
